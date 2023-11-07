@@ -1,0 +1,3 @@
+module github.com/jieggii/bm
+
+go 1.21.3
