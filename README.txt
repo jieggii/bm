@@ -11,7 +11,7 @@ Commands:
     rm <id>            remove book
 
 Dependencies:
-    go
+    go, make
 
 Installation:
     make
