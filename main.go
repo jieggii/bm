@@ -152,7 +152,7 @@ func main() {
 	argsHandler := args.Handler{
 		ProgramMeta: args.ProgramMeta{
 			Name:        "bm",
-			Description: "bm - bookmarking tool (literally for books) ",
+			Description: "bm - simple bookmarking tool (literally for books)",
 			Version:     "0.1.0",
 			Author:      "jieggii <jieggii@protonmail.com>",
 		},
