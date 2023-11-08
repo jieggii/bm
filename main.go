@@ -4,10 +4,15 @@ import (
 	"fmt"
 	"github.com/jieggii/bm/internal/args"
 	"github.com/jieggii/bm/internal/env"
+	"github.com/jieggii/bm/internal/logger"
 	"github.com/jieggii/bm/internal/storage"
 	"os"
 	"strconv"
 )
+
+func fmtBookStatus(bookTitle string, bookID string, page int) string {
+	return fmt.Sprintf("\"%v\" (%v): page %v.", bookTitle, bookID, page)
+}
 
 func CommandNew(arguments []string) error {
 	bookTitle := arguments[0]
@@ -32,7 +37,7 @@ func CommandNew(arguments []string) error {
 	}
 
 	// print the book ID
-	fmt.Println(bookID)
+	logger.Plus.Printf("Created a new book \"%v\", id: %v.", bookTitle, bookID)
 	return nil
 }
 
@@ -55,12 +60,12 @@ func CommandShow(arguments []string) error {
 	}
 
 	// print information about the book
-	fmt.Printf("%v (\"%v\"): page %v\n", bookID, book.Title, book.PageNumber)
+	logger.Stdout.Printf(fmtBookStatus(book.Title, bookID, book.PageNumber))
 
 	return nil
 }
 
-func CommandLs(arguments []string) error {
+func CommandLs(_ []string) error {
 	vars := env.Read()
 	db := storage.New(vars.StorageHome, vars.StorageFileName)
 
@@ -72,7 +77,7 @@ func CommandLs(arguments []string) error {
 
 	// print all of them:
 	for bookID, book := range books {
-		fmt.Printf("- %v (\"%v\"): page %v\n", bookID, book.Title, book.PageNumber)
+		logger.Stdout.Printf("- %v", fmtBookStatus(book.Title, bookID, book.PageNumber))
 	}
 
 	return nil
@@ -112,7 +117,7 @@ func CommandSet(arguments []string) error {
 	}
 
 	// print information about the book:
-	fmt.Printf("%v (\"%v\"): page %v\n", bookID, book.Title, pageNumber)
+	logger.Update.Printf(fmtBookStatus(book.Title, bookID, book.PageNumber))
 
 	return nil
 
@@ -131,7 +136,7 @@ func CommandRm(arguments []string) error {
 	}
 
 	// check if book exists:
-	_, found := books[bookID]
+	book, found := books[bookID]
 	if !found {
 		return fmt.Errorf("book %v does not exist", bookID)
 	}
@@ -143,7 +148,7 @@ func CommandRm(arguments []string) error {
 		return err
 	}
 
-	fmt.Printf("deleted book %v\n", bookID)
+	logger.Minus.Printf("Deleted book \"%v\" (%v).", book.Title, bookID)
 	return nil
 
 }
@@ -196,8 +201,6 @@ func main() {
 		},
 	}
 	if err := argsHandler.Handle(); err != nil {
-		if _, err := fmt.Fprintf(os.Stderr, "bm: %v\n", err); err != nil {
-			panic(err)
-		}
+		logger.Stderr.Printf("bm: %v", err)
 	}
 }
